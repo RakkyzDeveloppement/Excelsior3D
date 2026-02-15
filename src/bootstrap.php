@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 function load_env(string $path): void {
     if (!file_exists($path)) {
         return;
