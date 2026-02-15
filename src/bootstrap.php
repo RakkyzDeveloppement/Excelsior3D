@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 function load_env(string $path): void {
     if (!file_exists($path)) {
         return;
@@ -26,17 +26,29 @@ function load_env(string $path): void {
 
 load_env(__DIR__ . '/../.env');
 
-$DB_HOST = getenv('DB_HOST') ?: 'localhost';
-$DB_PORT = (int)(getenv('DB_PORT') ?: 3306);
-$DB_NAME = getenv('DB_NAME') ?: 'excelsior';
-$DB_USER = getenv('DB_USER') ?: 'root';
-$DB_PASS = getenv('DB_PASS') ?: '';
-$FORCE_HTTPS = (getenv('APP_FORCE_HTTPS') ?: '0') === '1';
-$SHOW_RESET_TOKEN = (getenv('APP_SHOW_RESET_TOKEN') ?: '0') === '1';
-$MAILJET_API_KEY = getenv('MAILJET_API_KEY') ?: '';
-$MAILJET_API_SECRET = getenv('MAILJET_API_SECRET') ?: '';
-$MAIL_FROM_EMAIL = getenv('MAIL_FROM_EMAIL') ?: '';
-$MAIL_FROM_NAME = getenv('MAIL_FROM_NAME') ?: 'Excelsior 3D';
+function env_value(string $key, string $fallback = ''): string {
+    $value = getenv($key);
+    if ($value === false || $value === null || $value === '') {
+        return $fallback;
+    }
+    $value = trim((string)$value);
+    if ((str_starts_with($value, '"') && str_ends_with($value, '"')) || (str_starts_with($value, "'") && str_ends_with($value, "'"))) {
+        $value = substr($value, 1, -1);
+    }
+    return $value;
+}
+
+$DB_HOST = env_value('DB_HOST', env_value('MYSQLHOST', 'localhost'));
+$DB_PORT = (int)env_value('DB_PORT', env_value('MYSQLPORT', '3306'));
+$DB_NAME = env_value('DB_NAME', env_value('MYSQLDATABASE', 'excelsior'));
+$DB_USER = env_value('DB_USER', env_value('MYSQLUSER', 'root'));
+$DB_PASS = env_value('DB_PASS', env_value('MYSQLPASSWORD', ''));
+$FORCE_HTTPS = env_value('APP_FORCE_HTTPS', '0') === '1';
+$SHOW_RESET_TOKEN = env_value('APP_SHOW_RESET_TOKEN', '0') === '1';
+$MAILJET_API_KEY = env_value('MAILJET_API_KEY', '');
+$MAILJET_API_SECRET = env_value('MAILJET_API_SECRET', '');
+$MAIL_FROM_EMAIL = env_value('MAIL_FROM_EMAIL', '');
+$MAIL_FROM_NAME = env_value('MAIL_FROM_NAME', 'Excelsior 3D');
 
 $serverDsn = 'mysql:host=' . $DB_HOST . ';port=' . $DB_PORT . ';charset=utf8mb4';
 $db = new PDO($serverDsn, $DB_USER, $DB_PASS, [
@@ -50,8 +62,8 @@ $db->exec('CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(255) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
-    phone VARCHAR(50) DEFAULT "",
-    address TEXT DEFAULT "",
+    phone VARCHAR(50) NULL,
+    address VARCHAR(500) NULL,
     created_at DATETIME NOT NULL
 )');
 
@@ -191,10 +203,10 @@ function json_response($data, int $code = 200): void {
 }
 
 function send_mailjet(string $toEmail, string $toName, string $subject, string $html, string $text = ''): array {
-    $apiKey = getenv('MAILJET_API_KEY') ?: '';
-    $apiSecret = getenv('MAILJET_API_SECRET') ?: '';
-    $fromEmail = getenv('MAIL_FROM_EMAIL') ?: '';
-    $fromName = getenv('MAIL_FROM_NAME') ?: 'Excelsior 3D';
+    $apiKey = env_value('MAILJET_API_KEY', '');
+    $apiSecret = env_value('MAILJET_API_SECRET', '');
+    $fromEmail = env_value('MAIL_FROM_EMAIL', '');
+    $fromName = env_value('MAIL_FROM_NAME', 'Excelsior 3D');
 
     if ($apiKey === '' || $apiSecret === '' || $fromEmail === '') {
         return ['ok' => false, 'error' => 'Missing Mailjet credentials'];
