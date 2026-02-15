@@ -1,12 +1,12 @@
-﻿CREATE DATABASE IF NOT EXISTS `excelsior` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE IF NOT EXISTS `excelsior` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE `excelsior`;
 
 CREATE TABLE IF NOT EXISTS users (
   id INT AUTO_INCREMENT PRIMARY KEY,
   email VARCHAR(255) NOT NULL UNIQUE,
   password_hash VARCHAR(255) NOT NULL,
-  phone VARCHAR(50) DEFAULT "",
-  address TEXT DEFAULT "",
+  phone VARCHAR(50) NULL,
+  address VARCHAR(500) NULL,
   created_at DATETIME NOT NULL
 );
 

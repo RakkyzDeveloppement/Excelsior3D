@@ -62,8 +62,8 @@ $db->exec('CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(255) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
-    phone VARCHAR(50) DEFAULT "",
-    address VARCHAR(500) DEFAULT "",
+    phone VARCHAR(50) NULL,
+    address VARCHAR(500) NULL,
     created_at DATETIME NOT NULL
 )');
 
